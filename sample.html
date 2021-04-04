@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width">
+    <title>samples</title>
+</head>
+
+<body>
+<script type="module">
+import { Linq } from "./linq.js"
+
+let monster = [
+    { no: 1, name: 'フシギダネ', type: 1, evoFr: null, evoTo: 2    },
+    { no: 2, name: 'フシギソウ', type: 1, evoFr: 1,    evoTo: 3    },
+    { no: 3, name: 'フシギバナ', type: 1, evoFr: 2,    evoTo: null },
+    { no: 4, name: 'ヒトカゲ',   type: 2, evoFr: null, evoTo: 5    },
+    { no: 5, name: 'リザード',   type: 2, evoFr: 4,    evoTo: 6    },
+    { no: 6, name: 'リザードン', type: 2, evoFr: 5,    evoTo: null },
+    { no: 7, name: 'ゼニガメ',   type: 3, evoFr: null, evoTo: 8    },
+    { no: 8, name: 'カメール',   type: 3, evoFr: 7,    evoTo: 9    },
+    { no: 9, name: 'カメックス', type: 3, evoFr: 8,    evoTo: null },
+]
+let types = [
+    { id: 1, name: 'くさ'},
+    { id: 2, name: 'ほのお'},
+    { id: 3, name: 'みず'},
+    { id: 4, name: 'でんき'},
+]
+/*
+let monster = [
+    { no: 1, name: 'Bulbasaur',     type: 1, evoFr: null, evoTo: 2    },
+    { no: 2, name: 'Ivysaur',       type: 1, evoFr: 1,    evoTo: 3    },
+    { no: 3, name: 'Venusaur',      type: 1, evoFr: 2,    evoTo: null },
+    { no: 4, name: 'Charmander',    type: 2, evoFr: null, evoTo: 5    },
+    { no: 5, name: 'Charmeleon',    type: 2, evoFr: 4,    evoTo: 6    },
+    { no: 6, name: 'Charizard',     type: 2, evoFr: 5,    evoTo: null },
+    { no: 7, name: 'Squirtle',      type: 3, evoFr: null, evoTo: 8    },
+    { no: 8, name: 'Wartortle',     type: 3, evoFr: 7,    evoTo: 9    },
+    { no: 9, name: 'Blastoise',     type: 3, evoFr: 8,    evoTo: null },
+]
+let types = [
+    { id: 1, name: 'Grass'},
+    { id: 2, name: 'Fire'},
+    { id: 3, name: 'Water'},
+    { id: 4, name: 'Electric'},
+]
+*/
+
+let ret
+
+//any
+ret = new Linq(monster).any(x=>x.type==2)
+
+console.log("--any")
+console.log(ret)
+
+//all
+ret = new Linq(monster).all(x=>x.type==2)
+
+console.log("--all")
+console.log(ret)
+
+//count
+ret = new Linq(monster).count()
+
+console.log("--count")
+console.log(ret)
+
+//sum
+ret = new Linq(monster).sum(x=>x.no)
+
+console.log("--sum")
+console.log(ret)
+
+//min
+ret = new Linq(monster).min(x=>x.no)
+
+console.log("--min")
+console.log(ret)
+
+//max
+ret = new Linq(monster).max(x=>x.no)
+
+console.log("--max")
+console.log(ret)
+
+//first
+ret = new Linq(monster).first(x=>x.type==2)
+
+console.log("--first")
+console.log(ret)
+
+//last
+ret = new Linq(monster).last(x=>x.type==2)
+
+console.log("--last")
+console.log(ret)
+
+//select
+ret = new Linq(monster)
+        .select(x=>{
+            return{
+                no: x.no,
+                name: x.name,
+            }
+        }).array
+
+console.log("--select")
+console.log(ret)
+
+//where
+ret = new Linq(monster)
+        .where(x=>x.type==2)
+        .array
+
+console.log("--where")
+console.log(ret)
+
+//skip and take
+ret = new Linq(monster)
+        .skip(3).take(3)
+        .array
+
+console.log("--skip and take")
+console.log(ret)
+
+//order
+ret = new Linq(monster)
+        .select(x=>x.name)
+        .order("desk")
+        .array
+
+console.log("--order")
+console.log(ret)
+
+//order by
+ret = new Linq(monster)
+        .orderBy("name","desk", "no","ask")
+        .array
+
+console.log("--order by")
+console.log(ret)
+
+//distinct
+ret = new Linq(monster)
+        .select(x=>x.type)
+        .distinct()
+        .array
+
+console.log("--distinct")
+console.log(ret)
+
+//left outer join
+ret = new Linq(monster)
+        .leftOuterJoin(types, 'types', (x,y) => x.type == y.id)
+        .leftOuterJoin(monster, 'prev', (x,y) => x.evoFr == y.no)
+        .leftOuterJoin(monster, 'next', (x,y) => x.evoTo == y.no)
+        .select(x=>{
+            return{
+                "no" : x.no,
+                "name": x.name,
+                "type": x.types.name,
+                "evolvesFrom": x.prev ? x.prev.name : "--",
+                'evolvesTo': x.next ? x.next.name : "--",
+            }
+        }).array
+
+console.log("--left outer join")
+console.log(ret)
+
+//inner join
+ret = new Linq(monster)
+        .innerJoin(monster, 'next', (x,y)=>x.evoTo == y.no)
+        .select(x=>{
+            return{
+                "no" : x.no,
+                "name": x.name,
+                'evolvesTo': x.next.name,
+            }
+        }).array
+
+console.log("--inner join")
+console.log(ret)
+
+//group by
+ret = new Linq(monster)
+        .leftOuterJoin(types, "types", (x,y)=>x.type == y.id)
+        .groupBy(x=>x.type)
+        .select(x=>{
+            return{
+                type: x.first().type,
+                name: x.first().types.name,
+                count: x.count(),
+                minNo: x.min(y=>y.no),
+                maxNo: x.max(y=>y.no),
+            }
+        }).array
+
+console.log("--group by")
+console.log(ret)
+
+</script>
+
+</body>
+</html>
+
